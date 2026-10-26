@@ -60,7 +60,14 @@ for s in [s for s in sections if s['book']!='ACT']:
 # Read in broad ministry stages. Ordering inside stages is editorial and does not invent daily dates.
 for u in units:
  pref=next((w for w in u['witnesses'] if w['book']=='MRK'),u['witnesses'][0]);u['primary']=pref['book'];u['sort']=min(float(w['verses'][0].replace(':','.'))/(28 if w['book']=='MAT' else 16 if w['book']=='MRK' else 24 if w['book']=='LUK' else 21) for w in u['witnesses'])
-units.sort(key=lambda u:(u['phase'],u['sort']))
+# Explicit narrative anchors avoid chapter-length ratios reversing supper, trial and burial.
+passion='杀害耶稣的阴谋|在伯大尼受膏|犹大出卖耶稣|和门徒同度逾越节|耶稣为门徒洗脚|预言自己将被出卖|设立主的晚餐|争论谁为大|新的命令|预言彼得不认主|钱囊、口袋、刀|耶稣是道路、真理、生命|应许赐圣灵|耶稣是真葡萄树|世人的憎恨|圣灵的工作|忧愁变为喜乐|我已经胜过世界|耶稣的祷告|在客西马尼祷告|耶稣被捕|逃走的少年人|耶稣被带到亚那面前|大祭司盘问耶稣|彼得三次不认主|耶稣在公会里受审|戏弄鞭打耶稣|耶稣被交给彼拉多|犹大的死|耶稣在彼拉多面前受审|希律藐视耶稣|耶稣被判死刑|兵丁戏弄耶稣|耶稣被钉十字架|耶稣的死|肋旁被扎|耶稣的安葬|封石妥守'.split('|')
+resurrection='耶稣复活|向抹大拉的马利亚显现|看守的兵报告祭司长|在以马忤斯的路上|向两个门徒显现|向门徒显现|耶稣和多马|本书的目的|耶稣向七个门徒显现|耶稣和彼得|耶稣和他所爱的那门徒|门徒奉差遣|耶稣升天'.split('|')
+def reading_order(u):
+ order=passion if u['phase']==6 else resurrection if u['phase']==7 else []
+ rank=order.index(u['title']) if u['title'] in order else len(order)+u['sort']
+ return (u['phase'],rank if order else u['sort'])
+units.sort(key=reading_order)
 covered=[w['book']+':'+v for u in units for w in u['witnesses'] for v in w['verses']]
 assert len(covered)==len(set(covered))==sum(len(records[b]['verses']) for b in codes[:4])
 out=Path('assets/gospel-source');out.mkdir(exist_ok=True)
