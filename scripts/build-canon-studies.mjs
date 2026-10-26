@@ -2,8 +2,8 @@ import {readFile} from 'node:fs/promises';
 import {studyPage,studyPages,esc as e} from './study-shell.mjs';
 const {books}=JSON.parse(await readFile('assets/books.json','utf8'));
 const {groups,focus}=JSON.parse(await readFile('data/canon-comparisons-v17.json','utf8'));
-const depth=(await readFile('data/book-depth-v15.tsv','utf8')).trim().split('\n').map(line=>line.split('|'));
-const cases=(await readFile('data/canon-cases-v17.tsv','utf8')).trim().split('\n').map(line=>line.split('|'));
+const depth=(await readFile('data/book-depth-v15.tsv','utf8')).trim().split(/\r?\n/).map(line=>line.split('|'));
+const cases=(await readFile('data/canon-cases-v17.tsv','utf8')).trim().split(/\r?\n/).map(line=>line.split('|'));
 if(cases.some(r=>r.length!==8)||Object.keys(focus).length!==60)throw Error('Incomplete canon study data');
 const bookFile=b=>'books/'+String(books.indexOf(b)+1).padStart(2,'0')+'-'+b.english.toLowerCase().replaceAll(' ','-')+'.html';
 // Preserve canonical filename variants by resolving actual generated files.

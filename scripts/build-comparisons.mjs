@@ -2,7 +2,7 @@ import {studyPage} from './study-shell.mjs';
 import {readFile,writeFile} from 'node:fs/promises';
 const {books,groups}=JSON.parse(await readFile('assets/books.json','utf8'));
 const kings=JSON.parse(await readFile('data/kings-v16.json','utf8'));
-const life=(await readFile('data/jesus-life-v2.tsv','utf8')).trim().split('\n').map((r,i)=>{const a=r.split('|');if(a.length!==12)throw Error('Life row '+i);return{id:a[0],phase:a[1],title:a[2],time:a[3],place:a[4],certainty:a[5],refs:a.slice(6,10),meaning:a[10],note:a[11]}});
+const life=(await readFile('data/jesus-life-v2.tsv','utf8')).trim().split(/\r?\n/).map((r,i)=>{const a=r.split('|');if(a.length!==12)throw Error('Life row '+i);return{id:a[0],phase:a[1],title:a[2],time:a[3],place:a[4],certainty:a[5],refs:a.slice(6,10),meaning:a[10],note:a[11]}});
 if(life.length!==94||new Set(life.map(e=>e.id)).size!==life.length||kings.length!==39)throw Error('Incomplete comparison data');
 const e=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const names=['马太','马可','路加','约翰'],english=['Matthew','Mark','Luke','John'];

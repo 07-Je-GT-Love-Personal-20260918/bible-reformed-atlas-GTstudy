@@ -2,7 +2,7 @@ import {studyPages} from './study-shell.mjs';
 import {readFile,writeFile,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 const {groups,books}=JSON.parse(await readFile('assets/books.json','utf8'));
-const depth=(await readFile('data/book-depth-v15.tsv','utf8')).trim().split('\n').map(line=>line.split('|'));
+const depth=(await readFile('data/book-depth-v15.tsv','utf8')).trim().split(/\r?\n/).map(line=>line.split('|'));
 const creeds=JSON.parse(await readFile('assets/creeds.json','utf8'));
 const esc=value=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 if(books.length!==66||creeds.length!==3)throw Error('Incomplete source data');

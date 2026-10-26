@@ -51,37 +51,37 @@ print('Static validation:',len(paths),'pages;',len(books),'complete book records
 for error in errors:print(error)
 assert not errors
 
-assert (public/"jesus-life.html").read_text().count("class=\"life-event\"")==94
-assert len(json.loads((root/"data/kings-v16.json").read_text()))==39
+assert (public/"jesus-life.html").read_text(encoding='utf-8').count("class=\"life-event\"")==94
+assert len(json.loads((root/"data/kings-v16.json").read_text(encoding='utf-8')))==39
 
-canon=json.loads((root/'data/canon-comparisons-v17.json').read_text())
+canon=json.loads((root/'data/canon-comparisons-v17.json').read_text(encoding='utf-8'))
 assert len(canon['focus'])==60
 for group,expected in zip(canon['groups'],[5,12,5,17,21]):
-    text=(public/(group['slug']+'.html')).read_text()
+    text=(public/(group['slug']+'.html')).read_text(encoding='utf-8')
     assert text.count('class="canon-book"')==expected
     assert text.count('class="path-step"')==expected*3
     assert 'groupAnswer' in text and 'canonSearch' in text
-cases=(root/'data/canon-cases-v17.tsv').read_text().splitlines()
+cases=(root/'data/canon-cases-v17.tsv').read_text(encoding='utf-8').splitlines()
 assert len(cases)==22 and all(len(row.split('|'))==8 for row in cases)
 
-links=[line.split('|') for line in (root/'data/book-links-v2.tsv').read_text().splitlines()]
+links=[line.split('|') for line in (root/'data/book-links-v2.tsv').read_text(encoding='utf-8').splitlines()]
 assert len(links)==66 and all(len(row)==7 for row in links)
 for number in range(1,67):
     path=sorted((public/'books').glob(f'{number:02d}-*.html'))[0]
-    text=path.read_text()
+    text=path.read_text(encoding='utf-8')
     assert 'id="links"' in text and text.count('class="network-center"')==1
-home=(public/'index.html').read_text()
+home=(public/'index.html').read_text(encoding='utf-8')
 assert home.count('class="book-card library-book"')==66
 assert home.count('class="atlas-header"')==1
-assert len([r for r in (root/'data/acts-atlas-v2.tsv').read_text().splitlines()])==46
-harmony=json.loads((root/'data/gospel-harmony-v2.json').read_text())
+assert len([r for r in (root/'data/acts-atlas-v2.tsv').read_text(encoding='utf-8').splitlines()])==46
+harmony=json.loads((root/'data/gospel-harmony-v2.json').read_text(encoding='utf-8'))
 seen=[]
 for unit in harmony['units']:
     for witness in unit['witnesses']:
         seen.extend(witness['book']+':'+key for key in witness['verses'])
 expected=[]
 for code in ['MAT','MRK','LUK','JHN']:
-    source=json.loads((public/'assets/gospel-source'/(code+'.json')).read_text())
+    source=json.loads((public/'assets/gospel-source'/(code+'.json')).read_text(encoding='utf-8'))
     expected.extend(code+':'+key for key in source['verses'])
 assert len(seen)==len(set(seen))==3768 and set(seen)==set(expected)
-assert (public/'nt-history.html').read_text().count('class="nt-event"')==46
+assert (public/'nt-history.html').read_text(encoding='utf-8').count('class="nt-event"')==46

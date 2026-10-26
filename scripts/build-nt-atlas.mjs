@@ -1,5 +1,5 @@
 import {readFile,writeFile} from 'node:fs/promises';import {studyPage,esc as e} from './study-shell.mjs';
-const hm=JSON.parse(await readFile('data/gospel-harmony-v2.json','utf8'));const acts=(await readFile('data/acts-atlas-v2.tsv','utf8')).trim().split('\n').map(r=>{const a=r.split('|');if(a.length!==8)throw Error('Acts fields');return{id:a[0],phase:a[1],time:a[2],place:a[3],ref:a[4],title:a[5],meaning:a[6],context:a[7]}});
+const hm=JSON.parse(await readFile('data/gospel-harmony-v2.json','utf8'));const acts=(await readFile('data/acts-atlas-v2.tsv','utf8')).trim().split(/\r?\n/).map(r=>{const a=r.split('|');if(a.length!==8)throw Error('Acts fields');return{id:a[0],phase:a[1],time:a[2],place:a[3],ref:a[4],title:a[5],meaning:a[6],context:a[7]}});
 const phases=['序言与永恒之道','降生与成长','先驱与事工预备','加利利事工','跨区域与上耶路撒冷','耶路撒冷与受难周教导','最后晚餐、受审与十字架','复活、显现与升天'];
 const range=w=>w.name+' '+w.verses[0]+(w.verses.length>1?'—'+w.verses.at(-1):'');
 await writeFile('assets/gospel-source/harmony-index.json',JSON.stringify(hm));

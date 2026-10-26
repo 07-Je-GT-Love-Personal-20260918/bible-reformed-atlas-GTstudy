@@ -1,8 +1,8 @@
 import {readFile,writeFile,readdir} from 'node:fs/promises';
 const {books,groups}=JSON.parse(await readFile('assets/books.json','utf8'));
 const history=JSON.parse(await readFile('data/book-context.json','utf8'));
-const rows=(await readFile('data/study-notes-20261003.tsv','utf8')).trim().split('\n').map(line=>line.split('|'));
-const depth=(await readFile('data/book-depth-v15.tsv','utf8')).trim().split('\n').map(line=>line.split('|'));
+const rows=(await readFile('data/study-notes-20261003.tsv','utf8')).trim().split(/\r?\n/).map(line=>line.split('|'));
+const depth=(await readFile('data/book-depth-v15.tsv','utf8')).trim().split(/\r?\n/).map(line=>line.split('|'));
 if(rows.length!==66||depth.length!==66||rows.some((r,i)=>r.length!==6||r[0]!==books[i].name)||depth.some((r,i)=>r.length!==10||r[0]!==books[i].name))throw Error('66 ordered, complete records are required');
 const allFiles=(await readdir('books')).filter(f=>/^\d\d-.*\.html$/.test(f)).sort();
 const files=Array.from({length:66},(_,i)=>allFiles.find(f=>f.startsWith(String(i+1).padStart(2,'0')+'-')));if(files.some(f=>!f))throw Error('Missing book readers');
