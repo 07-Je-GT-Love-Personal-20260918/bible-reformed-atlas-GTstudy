@@ -16,6 +16,27 @@ if(f==='overview.html'||f==='study.html'){html=html.replace('<body>','<body clas
 html=html.replace(/<body([^>]*)>/,(m,attrs)=>attrs.includes('class=')?m.replace('class="','class="atlas-v2 '):`<body class="atlas-v2"${attrs}>`);
 html=html.replace(/(<body[^>]*>)/,`$1${v2nav(prefix,f==='index.html'?'books':f==='overview.html'?'overview':'')}`).replace('</head>',`<link rel="stylesheet" href="${prefix}assets/atlas-v2.css"></head>`).replace('</body>',`${['gospel-harmony.html','nt-history.html'].includes(f)?`<script src="${prefix}assets/nt-atlas-v2.js" defer></script>`:''}<script src="${prefix}assets/atlas-v2.js" defer></script></body>`);
 if(['gospel-harmony.html','nt-history.html'].includes(f))html=html.replace('<main class="book-reader"','<main class="book-reader nt-reader"');
+const mapEntries = {
+  'overview.html': ['geography', 'exile', '古代近东、帝国与归回'],
+  'study.html': ['geography', 'exile', '古代近东、帝国与归回'],
+  'jesus-life.html': ['lifeRange', 'galilee', '加利利到耶路撒冷'],
+  'nt-history.html': ['ntRange', 'mission', '使徒行程与今日地理'],
+  'kings-chronicles.html': [null, 'kingdoms', '南北国、亚述和被掳归回']
+};
+if (mapEntries[f]) {
+  const [anchor, scene, title] = mapEntries[f];
+  const link = `<p class="geo-related"><a href="geography.html?scene=${scene}#live-map">⌖ ${title}：图解与实时地图 →</a></p>`;
+  if (anchor === 'geography') html = html.replace(/(<section[^>]*id="geography"[^>]*>[\s\S]*?<\/h2>)/, '$1'+link);
+  else if (anchor) html = html.replace(new RegExp('(<input[^>]*id="'+anchor+'"[^>]*>)'), '$1'+link);
+  else html = html.replace(/(<header class="reader-hero"[\s\S]*?<\/header>)/, '$1'+link);
+}
+if(f==='index.html') html=html.replace('</h1>', '</h1><p class="geo-related"><a href="geography.html">⌖ 地理、历史与文化 · 图解、实时底图与复习视频 →</a></p>');
+html = html.replace(/<meta name="atlas-version" content="[^"]+">/, '<meta name="atlas-version" content="2.1.0">')
+  .replaceAll('v2.0.0 · 2026-10-23','v2.1.0 · 2026-11-16')
+  .replaceAll('2026-10-23 · v2.0','2026-11-16 · v2.1')
+  .replace(/GTstudy v2\.0(?!\d)/g, 'GTstudy v2.1');
+if(f==='geography.html') html=html.replace('</head>','<link rel="stylesheet" href="assets/geo/atlas.css"></head>').replace('</body>','<script type="module" src="assets/geo/maps.js"></script></body>');
+else if(mapEntries[f]||f==='index.html') html=html.replace('</head>','<link rel="stylesheet" href="assets/geo/atlas.css"></head>');
 await writeFile(f,html);
 }
 console.log('v2 shell applied: unified ordered navigation, 66 enriched readers and132 evidence links.');

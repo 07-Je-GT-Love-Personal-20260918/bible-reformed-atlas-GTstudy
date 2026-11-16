@@ -14,9 +14,9 @@ class Page(HTMLParser):
             if key=='id':
                 if value in self.ids:self.duplicates.append(value)
                 self.ids.add(value)
-            if key in ('href','src') and value:self.links.append(value)
+            if key in ('href','src','poster') and value:self.links.append(value)
 
-paths=[public/'index.html',public/'study.html',public/'overview.html',public/'nt-history.html',public/'gospel-harmony.html',public/'creeds.html',*[public/(x+'.html') for x in ['gospels','jesus-life','kings-chronicles','book-relations','pentateuch','historical-books','wisdom-books','prophets','epistles','study-paths']],*sorted((public/'books').glob('*.html'))]
+paths=[public/'index.html',public/'study.html',public/'overview.html',public/'nt-history.html',public/'gospel-harmony.html',public/'creeds.html',*[public/(x+'.html') for x in ['gospels','jesus-life','kings-chronicles','book-relations','pentateuch','historical-books','wisdom-books','prophets','epistles','study-paths','geography']],*sorted((public/'books').glob('*.html'))]
 cache={p.resolve():Page(p.read_text(encoding='utf-8')) for p in public.rglob('*.html')}
 errors=[]
 for path in paths:

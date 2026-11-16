@@ -1,6 +1,6 @@
 # 整本圣经 · 救赎历史与逐卷深读
 
-**整本圣经-20261023-v2.0.0-GTstudy**
+**整本圣经-20261116-v2.1.0-GTstudy**
 
 默认首页直接显示全部66卷；全景位于第二入口。欧陆改革宗、救赎历史、圣约神学与圣经神学为整体框架。
 
@@ -9,11 +9,20 @@
 | 平台 | 公开地址 |
 | --- | --- |
 | GitHub Pages | https://07-je-gt-love-personal-20260918.github.io/bible-reformed-atlas-GTstudy/ |
-| Vercel | https://bible-reformed-atlas-20261023-v2-0-gtstudy.vercel.app/ |
-| Surge | https://bible-reformed-atlas-20261023-v2-0-gtstudy.surge.sh/ |
+| Vercel | https://bible-reformed-atlas-20261116-v2-1-gtstudy.vercel.app/ |
+| Surge | https://bible-reformed-atlas-20261116-v2-1-gtstudy.surge.sh/ |
 | GitHub 源码 | https://github.com/07-Je-GT-Love-Personal-20260918/bible-reformed-atlas-GTstudy |
 
 仓库已按要求改名为仅含主题与GTstudy的 `bible-reformed-atlas-GTstudy`，ID仍为1376927002，没有新建重复仓库。旧GitHub仓库链接由GitHub重定向；Pages应使用上表新路径，不能把仓库重定向等同于Pages路径重定向。旧Vercel域名和两个旧Surge域名继续保留。
+
+## v2.1 更新 · 2026-11-16
+
+- 新增 [圣经地理、历史与文化](geography.html)。六个场景各自包含经文故事、近似年代、站内地图、文化处境、圣约释读和主动回忆。全景、耶稣生平、使徒行传及列王专题提供对应入口。
+- 把站内地图与现代在线底图区分显示。CARTO、OpenStreetMap、OpenTopoMap可手动切换，连接失败时自动尝试其余来源。另有Google Maps和Esri卫星图外部入口。站内海岸轮廓基于Natural Earth公共领域资料，选点连线用于叙事教学。
+- 新增帝国对照表、读图流程、加利利渔业场景插图及一分钟无声动画视频。视频含中文画面文字、字幕和可展开讲解稿。
+- 手机笔记面板支持进入整段点选模式，点中正文后自动回到样式选区。既有八种标记可继续编辑。隐藏面板暂停生成笔记列表，移动端减轻模糊合成，地图和视频按需联网或读取。
+- 三份普世信经继续使用CCI正文和构建校验。三项联合信条提供CCI原文入口及本站导读，公开仓库未收录CCI中文全文。
+- 更新前恢复版本：`v2.0.0-20261116-before-v2.1`，提交 `dca259782bde201a8e0397dce38cb589d2cc2c3a`。
 
 ## 2026-10-26 · 续接验收与构建修正
 

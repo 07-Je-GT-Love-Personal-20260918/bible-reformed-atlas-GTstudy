@@ -39,3 +39,13 @@ html{scroll-behavior:auto}
 @media(max-width:900px){.toc-toggle,.reader-settings{backdrop-filter:none;background:var(--card)}}
 
 .note-toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.note-toolbar input{min-width:0;max-width:100%;width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;font:inherit;background:var(--paper);color:var(--ink)}.note-toolbar select,.note-style-select{font:inherit;font-size:12px;padding:9px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:9px;max-width:100%}.note-edit{width:100%;margin-bottom:10px}.note-label{display:block;color:var(--muted);font-size:11px;margin-top:8px}.note-actions button{transition:transform .16s ease-out}.note-actions button:active{transform:scale(.97)}.note-violet{color:var(--purple);background:transparent;font-weight:750}.note-green{color:var(--green);background:color-mix(in srgb,var(--green) 12%,transparent);border-bottom:2px solid var(--green)}
+.paragraph-pick-hint{position:fixed;inset-inline-start:50%;bottom:max(65px,calc(env(safe-area-inset-bottom) + 58px));transform:translateX(-50%);z-index:450;max-width:calc(100vw - 24px);border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);box-shadow:0 8px 28px #16242a33;padding:10px 13px;font:inherit;font-weight:700;cursor:pointer}
+.paragraph-pick-hint[hidden]{display:none}
+.experience-panel .note-actions button{min-height:42px;border-bottom-width:3px}
+.experience-panel [data-note-style="gold"]{border-bottom-color:var(--note-gold)}
+.experience-panel [data-note-style="blue"]{border-bottom-color:var(--note-blue)}
+.experience-panel [data-note-style="rose"]{border-bottom-color:var(--note-rose);border-bottom-style:dashed}
+.experience-panel [data-note-style="violet"],.experience-panel [data-note-style="wave"]{border-bottom-color:var(--purple)}
+.experience-panel [data-note-style="green"],.experience-panel [data-note-style="block"]{border-bottom-color:var(--green)}
+.selection-block{border-inline-start:3px solid var(--green)!important}
+@media(max-width:650px){.experience-panel{max-height:calc(100dvh - 72px);overscroll-behavior:contain}.atlas-v2 .atlas-header{backdrop-filter:none}}

@@ -12,3 +12,11 @@
 
 .nt-player-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1.3fr)}.nt-player-grid>*{min-width:0}.nt-map-viewport{max-width:100%}
 @media(max-width:1120px){.nt-player-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:650px){
+ .atlas-v2 .experience-panel{left:12px;right:12px;width:auto;max-width:none;box-sizing:border-box;padding:16px}
+ .atlas-v2 .selection-toolbar{max-width:calc(100% - 20px)}
+}
+@media(min-width:901px){
+ .atlas-v2 .toc-toggle{top:calc(var(--header-height) + 12px);z-index:110}
+ .atlas-v2 .reader-toc{padding-top:62px}
+}

@@ -6,7 +6,7 @@ if (host) {
   panel.id = 'animated-atlas';
   panel.setAttribute('aria-label', '动画历史学习台');
   panel.innerHTML = `
-    <div class="motion-heading"><div><p class="motion-kicker">EXPLORE THE STORY · 动态历史图谱</p><h2>让年代、王国与地点一起动起来</h2></div><span class="motion-badge">交互学习 / v1.3</span></div>
+    <div class="motion-heading"><div><p class="motion-kicker">EXPLORE THE STORY · 动态历史图谱</p><h2>让年代、王国与地点一起动起来</h2></div></div>
     <p>拖动年代游标，看南北王国的兴衰。地图为方位示意，路线不代表精确行程；列王共治时会同时显示多位名字。</p>
     <div class="motion-controls"><button type="button" id="atlasPlay" aria-pressed="false">▶ 播放历史</button><button type="button" id="atlasReset">↺ 回到分裂</button><output id="atlasYear" for="atlasYearRange">主前 931 年</output></div>
     <label class="motion-range-label" for="atlasYearRange">历史游标 · 可用键盘方向键微调</label><input id="atlasYearRange" class="motion-range" type="range" min="0" max="473" step="1" value="0" aria-valuetext="主前931年">
@@ -16,7 +16,7 @@ if (host) {
     <div class="motion-events" role="group" aria-label="跳至关键事件"></div>
     <div class="motion-map-head"><h3>帝国之间，应许没有中断</h3><div role="group" aria-label="选择历史路线"><button type="button" class="route-button" data-route="exile" aria-pressed="true">↗ 被掳方向</button><button type="button" class="route-button" data-route="return" aria-pressed="false">↙ 归回方向</button><button type="button" id="routeReplay">重播路线</button></div></div>
     <svg class="motion-map" viewBox="0 0 900 360" role="img" aria-labelledby="motionMapTitle motionMapDesc"><title id="motionMapTitle">犹大、巴比伦与波斯区域方向图</title><desc id="motionMapDesc">路线示意从耶路撒冷绕经北方到巴比伦，或反向归回。图形非比例，不复原古代精确疆界。</desc><defs><linearGradient id="atlasLand" x2="1" y2="1"><stop stop-color="#f1ead7"/><stop offset="1" stop-color="#dfebdf"/></linearGradient></defs><rect width="900" height="360" rx="24" fill="url(#atlasLand)"/><path d="M0 0H260L225 90 195 150 180 280 100 360H0Z" fill="#b3d5da"/><path d="M265 277Q305 80 470 76T738 205" fill="none" stroke="#c8b882" stroke-width="38" opacity=".35"/><g fill="#254c49" font-family="sans-serif" font-size="20"><text x="45" y="105">地中海</text><text x="62" y="303">埃及</text><text x="215" y="213">耶路撒冷</text><text x="322" y="70">叙利亚</text><text x="565" y="73">亚述</text><text x="651" y="236">巴比伦</text><text x="771" y="291">波斯</text><text x="385" y="306" font-size="17" opacity=".7">阿拉伯旷野</text></g><path id="atlasRoute" d="M275 230Q310 100 442 105T690 205" fill="none" stroke="#b25c43" stroke-width="4" stroke-linecap="round"/><circle cx="275" cy="230" r="7" fill="#294f4b"/><circle cx="690" cy="205" r="7" fill="#294f4b"/><circle id="atlasTraveler" r="9" fill="#ad7540" stroke="#fffdf8" stroke-width="4"/><text x="25" y="339" fill="#486560" font-size="14" font-family="sans-serif">古代近东方位示意 · 非比例地图 · 不复原精确路线</text></svg>
-    <p id="routeCaption" class="motion-caption"></p><p class="motion-caption">年代采用常见近似重建，部分共治与即位年代有争议；点击事件读具体说明。尊重“减少动态效果”设置，动画默认不自动播放。</p>`;
+    <p><a href="geography.html?scene=exile#live-map">⌖ 对照本站图解与今日地图 →</a></p><p id="routeCaption" class="motion-caption"></p><p class="motion-caption">年代采用常见近似重建，部分共治与即位年代有争议；点击事件读具体说明。尊重“减少动态效果”设置，动画默认不自动播放。</p>`;
   host.prepend(panel);
 
   const milestones = [

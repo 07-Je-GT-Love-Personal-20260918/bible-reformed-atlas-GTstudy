@@ -10,12 +10,58 @@ const $=s=>panel.querySelector(s);const themes=[...panel.querySelectorAll('[data
 function theme(value){root.dataset.theme=value;save('atlas-theme',value);themes.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.themeChoice===value)));}
 themes.forEach(b=>b.addEventListener('click',()=>theme(b.dataset.themeChoice)));theme(read('atlas-theme','light'));
 function motion(){const enabled=root.dataset.motion!=='off';$('#ambientMotion').textContent=`轻盈浮动：${enabled?'开启':'关闭'}`;$('#ambientMotion').setAttribute('aria-pressed',String(enabled));}motion();$('#ambientMotion').addEventListener('click',()=>{root.dataset.motion=root.dataset.motion==='off'?'on':'off';save('atlas-motion',root.dataset.motion);motion();});
-function open(value){panel.hidden=!value;opener.setAttribute('aria-expanded',String(value));if(!value)opener.focus();}opener.addEventListener('click',()=>open(panel.hidden));$('.panel-close').addEventListener('click',()=>open(false));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)open(false);});
+function open(value, restoreFocus = true) {
+  panel.hidden = !value;
+  opener.setAttribute('aria-expanded', String(value));
+  if (value) drawNotes();
+  if (!value && restoreFocus) opener.focus();
+}opener.addEventListener('click',()=>open(panel.hidden));$('.panel-close').addEventListener('click',()=>open(false));document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden)open(false);});
 const key='atlas-notes-v1:'+location.pathname.replace(/overview\.html$/,'').replace(/(?:index|study)\.html$/,'').replace(/\/$/,'');let notes=[];try{notes=JSON.parse(read(key,'[]'));if(!Array.isArray(notes))notes=[]}catch{}
 const blocks=[...document.querySelectorAll('main p,main li')].filter(e=>!e.closest('.creed-paragraphs,.creed-source,nav,button,script,.reader-hero,.book-toc,.live-event')&&!e.querySelector('p,li,button,input,select'));
-let picking=false;$('#pickParagraph').addEventListener('click',()=>{picking=!picking;$('#pickParagraph').textContent=`点选整段：${picking?'开启':'关闭'}`;$('#pickParagraph').setAttribute('aria-pressed',String(picking));});
-const byId=new Map();blocks.forEach((el,i)=>{const id=el.id||`note-block-${i}`;el.dataset.noteBlock=id;byId.set(id,el)});let pending=null;
-document.addEventListener('click',event=>{if(!picking||panel.hidden)return;const el=event.target.closest?.('[data-note-block]');if(!el||el.textContent.length>1600)return;pending={block:el.dataset.noteBlock,start:0,end:el.textContent.length,quote:el.textContent};$('#selectedQuote').textContent=pending.quote;});
+const byId = new Map();
+blocks.forEach((el,i) => {
+  const id = el.id || 'note-block-' + i;
+  el.dataset.noteBlock = id;
+  byId.set(id, el);
+});
+let pending = null;
+let picking = false;
+const pickButton = $('#pickParagraph');
+const pickHint = document.createElement('button');
+pickHint.type = 'button';
+pickHint.className = 'paragraph-pick-hint';
+pickHint.textContent = '点按正文段落 · 取消';
+pickHint.hidden = true;
+document.body.append(pickHint);
+
+function setPicking(value) {
+  picking = value;
+  pickHint.hidden = !value;
+  pickButton.setAttribute('aria-pressed', String(value));
+  pickButton.textContent = value ? '点选整段：开启' : '点选整段：关闭';
+}
+
+pickButton.addEventListener('click', () => {
+  setPicking(!picking);
+  if (picking) open(false, false);
+});
+pickHint.addEventListener('click', () => { setPicking(false); open(true); pickButton.focus(); });
+document.addEventListener('keydown', event => {
+  if (picking && event.key === 'Escape') setPicking(false);
+});
+document.addEventListener('click', event => {
+  if (!picking || event.target.closest('a,button,select,input,textarea')) return;
+  const el = event.target.closest('[data-note-block]');
+  if (!el) return;
+  const quote = el.textContent;
+  if (!quote.trim() || quote.length > 1600) return;
+  pending = {block: el.dataset.noteBlock, start: 0, end: quote.length, quote};
+  $('#selectedQuote').textContent = quote;
+  $('#noteFeedback').textContent = '已选整段。选择一种标记，也可写下自己的理解。';
+  setPicking(false);
+  open(true);
+  panel.querySelector('[data-note-style]').focus({preventScroll:true});
+});
 function textNodes(el){const walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);return nodes;}
 function resolveNote(note){const exact=byId.get(note.block);if(exact&&exact.textContent.slice(note.start,note.end)===note.quote)return exact;const matches=blocks.filter(el=>el.textContent.slice(note.start,note.end)===note.quote);return matches.length===1?matches[0]:null;}
 const painted=new Set();
@@ -23,15 +69,15 @@ function paint(){for(const el of painted){el.querySelectorAll('mark[data-persona
  for(const note of [...notes].sort((a,b)=>b.start-a.start)){const el=resolveNote(note);if(!el)continue;painted.add(el);let offset=0;for(const node of textNodes(el)){const start=Math.max(0,note.start-offset),end=Math.min(node.length,note.end-offset);offset+=node.length;if(start>=end)continue;const range=document.createRange();range.setStart(node,start);range.setEnd(node,end);const mark=document.createElement('mark');mark.className=`note-${note.style}`;mark.dataset.personalNote=note.id;range.surroundContents(mark);}}
 }
 const noteStyles={gold:'金色底纹',blue:'蓝色实线',rose:'玫红虚线',bold:'核心加粗',block:'侧线重点',violet:'紫色关键词',green:'绿色论证',wave:'波浪难点'};
-function drawNotes(){const list=$('#noteList');list.replaceChildren();const query=$('#noteSearch').value.trim().toLowerCase(),style=$('#noteFilter').value;const shown=notes.filter(note=>(style==='all'||note.style===style)&&(!query||(note.quote+' '+note.thought).toLowerCase().includes(query)));$('#noteVisibleCount').textContent=`${shown.length} / ${notes.length}条`;
+function drawNotes(){if(panel.hidden)return;const list=$('#noteList');list.replaceChildren();const query=$('#noteSearch').value.trim().toLowerCase(),style=$('#noteFilter').value;const shown=notes.filter(note=>(style==='all'||note.style===style)&&(!query||(note.quote+' '+note.thought).toLowerCase().includes(query)));$('#noteVisibleCount').textContent=`${shown.length} / ${notes.length}条`;
 for(const note of shown){const item=document.createElement('li'),quote=document.createElement('p'),thought=document.createElement('textarea'),go=document.createElement('button'),remove=document.createElement('button'),select=document.createElement('select'),label=document.createElement('label');quote.className='note-quote';quote.textContent=note.quote;thought.className='note-edit';thought.value=note.thought;thought.setAttribute('aria-label','修改这条笔记的理解');thought.addEventListener('input',()=>{note.thought=thought.value.trim();save(key,JSON.stringify(notes));$('#noteFeedback').textContent='理解已保存。'});select.className='note-style-select';select.setAttribute('aria-label','修改这条笔记的标记样式');for(const [value,title] of Object.entries(noteStyles)){const option=document.createElement('option');option.value=value;option.textContent=title;select.append(option)}select.value=note.style;select.addEventListener('change',()=>{note.style=select.value;render();$('#noteFeedback').textContent='标记样式已更新，无须删除重建。'});label.className='note-label';label.textContent='我的理解 · 输入自动保存';label.append(thought);go.type=remove.type='button';go.textContent='定位';remove.textContent='删除此条';go.addEventListener('click',()=>{const el=resolveNote(note);if(el){const near=Math.abs(el.getBoundingClientRect().top)<innerHeight*2;el.scrollIntoView({behavior:near&&!matchMedia('(prefers-reduced-motion:reduce)').matches?'smooth':'instant',block:'center'});el.classList.add('annotated-focus');setTimeout(()=>el.classList.remove('annotated-focus'),1800)}else $('#noteFeedback').textContent='此条对应的段落已更新，原笔记仍保留。'});remove.addEventListener('click',()=>{notes=notes.filter(n=>n.id!==note.id);render()});item.append(quote,label,select,go,remove);list.append(item);}}
 function render(){save(key,JSON.stringify(notes));paint();$('#noteCount').textContent=String(notes.length);drawNotes();}
 $('#noteSearch').addEventListener('input',drawNotes);$('#noteFilter').addEventListener('change',drawNotes);
 
 let selectionTimer;document.addEventListener('selectionchange',()=>{clearTimeout(selectionTimer);selectionTimer=setTimeout(()=>{const selection=getSelection();if(!selection||selection.isCollapsed||!selection.rangeCount)return;const range=selection.getRangeAt(0),start=range.startContainer.nodeType===3?range.startContainer.parentElement:range.startContainer,end=range.endContainer.nodeType===3?range.endContainer.parentElement:range.endContainer;const block=start.closest?.('[data-note-block]');if(!block||block!==end.closest?.('[data-note-block]'))return;const prefix=document.createRange();prefix.selectNodeContents(block);prefix.setEnd(range.startContainer,range.startOffset);const a=prefix.toString().length,quote=range.toString();if(!quote.trim()||quote.length>1600)return;pending={block:block.dataset.noteBlock,start:a,end:a+quote.length,quote};$('#selectedQuote').textContent=quote;const rect=range.getBoundingClientRect();document.dispatchEvent(new CustomEvent('atlas:selection',{detail:{quote,rect:{left:rect.left,top:rect.top,bottom:rect.bottom}}}));},90)});
-document.addEventListener('atlas:content-ready',event=>{const area=event.detail?.root;if(!area)return;for(const [id,el]of byId)if(!el.isConnected)byId.delete(id);for(let i=blocks.length-1;i>=0;i--)if(!blocks[i].isConnected)blocks.splice(i,1);for(const el of area.querySelectorAll('p,li')){if(el.closest('.creed-paragraphs,.creed-source,nav,button,script')||el.querySelector('p,li,button,input,select')||(!el.matches('.scripture-verse')&&el.closest('.live-event')))continue;const id=el.id||el.dataset.noteBlock||'dynamic-note-'+blocks.length;el.dataset.noteBlock=id;if(!blocks.includes(el))blocks.push(el);byId.set(id,el)}paint();});
+document.addEventListener('atlas:content-ready',event=>{const area=event.detail?.root;if(!area)return;for(const el of painted)if(!el.isConnected)painted.delete(el);for(const [id,el]of byId)if(!el.isConnected)byId.delete(id);for(let i=blocks.length-1;i>=0;i--)if(!blocks[i].isConnected)blocks.splice(i,1);for(const el of area.querySelectorAll('p,li')){if(el.closest('.creed-paragraphs,.creed-source,nav,button,script')||el.querySelector('p,li,button,input,select')||(!el.matches('.scripture-verse')&&el.closest('.live-event')))continue;const id=el.id||el.dataset.noteBlock||'dynamic-note-'+blocks.length;el.dataset.noteBlock=id;if(byId.get(id)!==el)blocks.push(el);byId.set(id,el)}paint();});
 
-panel.querySelectorAll('[data-note-style]').forEach(button=>button.addEventListener('click',()=>{if(!pending){$('#noteFeedback').textContent='请先在正文中选择一段文字。';return}if(notes.some(n=>n.block===pending.block&&n.start<pending.end&&n.end>pending.start)){$('#noteFeedback').textContent='这段已有标记；可先删除原标记再更换样式。';return}notes.push({...pending,id:Date.now().toString(36),style:button.dataset.noteStyle,thought:$('#noteThought').value.trim(),date:new Date().toISOString()});$('#noteThought').value='';pending=null;render();$('#noteFeedback').textContent='已保存到本设备。';}));
+panel.querySelectorAll('[data-note-style]').forEach(button=>button.addEventListener('click',()=>{if(!pending){$('#noteFeedback').textContent='请先在正文中选择一段文字。';return}if(notes.some(n=>n.block===pending.block&&n.start<pending.end&&n.end>pending.start)){$('#noteFeedback').textContent='这段已有标记；可先删除原标记再更换样式。';return}notes.push({...pending,id:crypto.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2),style:button.dataset.noteStyle,thought:$('#noteThought').value.trim(),date:new Date().toISOString()});$('#noteThought').value='';pending=null;$('#selectedQuote').textContent='尚未选择正文。';getSelection()?.removeAllRanges();render();$('#noteFeedback').textContent='已保存到本设备。';}));
 $('#exportNotes').addEventListener('click',()=>{const text=`# ${document.title}\n\n`+notes.map(n=>`> ${n.quote}\n\n${n.thought}\n`).join('\n');const url=URL.createObjectURL(new Blob([text],{type:'text/markdown;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='GTstudy-notes-'+new Date().toISOString().slice(0,10)+'.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)});render();
 document.addEventListener('visibilitychange',()=>document.body.classList.toggle('page-away',document.hidden));
 const hero=document.querySelector('.reader-hero');if(hero){const observer=new IntersectionObserver(entries=>{hero.classList.toggle('hero-away',!entries[0].isIntersecting)});observer.observe(hero);}
