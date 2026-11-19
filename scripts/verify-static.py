@@ -103,3 +103,35 @@ for number in range(1,67):
     path=sorted((public/'books').glob(f'{number:02d}-*.html'))[0]
     assert 'id="panorama-reading"' in path.read_text(encoding='utf-8')
 print('Panorama: all 339 pages, 79 units, 66 book links; original PDF SHA-256 verified.')
+
+# Confirm the in-place reading preserves every author block in order.
+from html import unescape
+import re
+
+flow=json.loads((root/'data/panorama-flow.json').read_text(encoding='utf-8'))
+for entry in source['entries']:
+    start=entry['start']
+    book=entry['book']
+    blocks=flow[str(start)]
+    if book:
+        reader=sorted((public/'books').glob(f'{book:02d}-*.html'))[0]
+    elif start in (1,5,9,199):
+        reader=public/'panorama.html'
+    elif start in (11,13,201):
+        reader=public/'overview.html'
+    elif start in (115,227):
+        reader=public/('prophets.html' if start==115 else 'epistles.html')
+    else:
+        reader=public/'preaching.html'
+    text=reader.read_text(encoding='utf-8')
+    actual=re.findall(r'data-source-block="'+str(start)+r':(\d+)"[^>]*>([^<]*)</(?:p|h4)>',text)
+    expected=[(str(i), re.sub(r'\s*\.{3,}\s*\d+\s*$', '', block['text'])
+               if block['kind']=='index' else block['text']) for i,block in enumerate(blocks)]
+    assert [(i,unescape(content)) for i,content in actual]==expected, reader
+    assert 'class="source-page"' not in text
+    if book:
+        assert text.index('id="whole"')<text.index('id="panorama-reading"')<text.index('id="context"')
+        assert text.index('id="structure"')<text.index('id="panorama-continuation"')<text.index('id="passage"')
+        assert ('id="panorama-recall"' in text)==any(b['kind']=='reflection' for b in blocks)
+assert len(flow)==79
+print('Continuous edition: all 79 readings in their native study pages, with source order retained.')

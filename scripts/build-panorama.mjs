@@ -1,56 +1,180 @@
-import {readFile,writeFile,readdir,mkdir} from 'node:fs/promises';
-import {studyPage,esc} from './study-shell.mjs';
-const source=JSON.parse(await readFile('data/panorama-source.json','utf8'));
-const {books}=JSON.parse(await readFile('assets/books.json','utf8'));
-const names=await readdir('books');
-const target=i=>names.find(n=>n.startsWith(String(i).padStart(2,'0')+'-'));
-const groups=[['整体与导论',e=>!e.book&&e.start<320],['旧约39卷',e=>e.book&&e.book<=39],['新约27卷',e=>e.book>39],['讲道附录',e=>e.start>=320]];
-const pageUrl=e=>'panorama-'+String(e.start).padStart(3,'0')+'.html';
-const allMenu=groups.map(([name,test])=>'<details class="toc-branch" open><summary>'+name+'</summary>'+source.entries.filter(test).map(e=>'<a href="'+pageUrl(e)+'">'+esc(e.title)+'</a>').join('')+'</details>').join('');
-const paragraph=text=>text.split(/\n\s*\n/).map(t=>t.trim()).filter(Boolean).map(t=>'<p>'+esc(t.replace(/\n/g,''))+'</p>').join('');
-for(const [index,entry] of source.entries.entries()){
- const b=entry.book?books[entry.book-1]:null;
- let body='<section class="chapter" id="reading-context"><h2>放回整本圣经读</h2><p>刘道顺牧师《新旧约圣经全景》 · PDF第'+entry.start+'—'+entry.end+'页。</p>';
- if(b) body+='<div class="panorama-lenses"><article><h3>本卷的整全位置</h3><p>'+esc(b.whole)+'</p></article><article><h3>圣约与基督</h3><p>'+esc(b.christ)+'</p></article></div><p><a href="books/'+target(entry.book)+'">返回本站逐卷精读 →</a></p>';
- body+='<p>下方为上传资料的文字提取。经文引注、用词和作者释读请与原版及圣经上下文对照。</p><p><a href="assets/panorama/original.pdf#page='+entry.start+'">查看原版对应页 ↗</a></p></section>';
- if(entry.questions.length)body+='<section class="chapter" id="source-recall"><h2>原书默想 · 先尝试复述</h2><ol>'+entry.questions.map(q=>'<li>'+esc(q)+'</li>').join('')+'</ol></section>';
- body+=entry.pages.map(({page,text})=>'<section class="chapter source-page" id="pdf-'+page+'"><h2>PDF第'+page+'页</h2>'+paragraph(text)+'</section>').join('');
- body+='<nav class="panorama-paging" aria-label="资料连续阅读">'+(index?'<a href="'+pageUrl(source.entries[index-1])+'">← '+esc(source.entries[index-1].title)+'</a>':'')+'<a href="panorama.html">全书目录</a>'+(index+1<source.entries.length?'<a href="'+pageUrl(source.entries[index+1])+'">'+esc(source.entries[index+1].title)+' →</a>':'')+'</nav>';
- const slug=pageUrl(entry).replace('.html','');
- await studyPage(slug,entry.title,'刘道顺牧师《新旧约圣经全景》 · 对照阅读',body);
- let html=await readFile(pageUrl(entry),'utf8');
- html=html.replace('<nav id="bookToc" class="book-toc" aria-label="分层学习目录">','<nav id="bookToc" class="book-toc" aria-label="分层学习目录"><details class="toc-branch" data-source-nav><summary>整本资料</summary>'+allMenu+'</details>');
- await writeFile(pageUrl(entry),html);
-}
-const overview='<section class="chapter" id="panorama-guide"><h2>从全景进入每一卷</h2><p>《新旧约圣经全景》把各卷放回救赎历史，追问神所作的事、人的回应，以及应许怎样在基督里成全。先读本卷整体位置，再阅读作者原文和默想题，最后回到经文核对。</p><ol class="panorama-flow"><li>整体脉络</li><li>本卷处境</li><li>作者论证</li><li>经文核对</li><li>复述与回应</li></ol><p>339页全部按实际正文起点归入79个阅读单元，包含封面、推荐、目录、序言、66卷和附录。</p><a href="assets/panorama/original.pdf">打开完整原版PDF</a></section>'+groups.map(([name,test],i)=>'<section class="chapter" id="panorama-group-'+i+'"><h2>'+name+'</h2><div class="panorama-index">'+source.entries.filter(test).map(e=>'<article><h3><a href="'+pageUrl(e)+'">'+esc(e.title)+'</a></h3><p>PDF '+e.start+'—'+e.end+'页</p></article>').join('')+'</div></section>').join('');
-await studyPage('panorama','新旧约全景 · 整本对照阅读','刘道顺牧师 · 339页完整资料与66卷学习相连',overview);
-for(const entry of source.entries.filter(e=>e.book)){
- for(const f of names.filter(n=>n.startsWith(String(entry.book).padStart(2,'0')+'-'))){
-  let html=await readFile('books/'+f,'utf8');
-  const box='<section class="chapter" id="panorama-reading"><h2>延伸阅读 · 刘道顺牧师全景</h2><p>结合本卷处境与论证，读原书对应章节及默想题。</p><p><a href="../'+pageUrl(entry)+'">本卷全景 · PDF '+entry.start+'—'+entry.end+'页 →</a></p></section>';
-  html=html.replace('<section id="recall"',box+'<section id="recall"').replace('</nav><div class="book-side-foot">','<a href="#panorama-reading">全景资料与默想</a></nav><div class="book-side-foot">');
-  await writeFile('books/'+f,html);
- }
+import {readFile, readdir, writeFile} from 'node:fs/promises';
+import {studyPage, esc} from './study-shell.mjs';
+
+const source = JSON.parse(await readFile('data/panorama-source.json', 'utf8'));
+const flow = JSON.parse(await readFile('data/panorama-flow.json', 'utf8'));
+const {books, groups} = JSON.parse(await readFile('assets/books.json', 'utf8'));
+const guides = (await readFile('data/panorama-reading-guides.txt', 'utf8'))
+  .trim().split(/\r?\n/).map(line => line.split('｜'));
+const files = (await readdir('books')).filter(file => /^\d\d-.*\.html$/.test(file)).sort();
+if (guides.length !== books.length || guides.some(fields => fields.length !== 2 || fields.some(field => !field))) {
+  throw new Error('Each book requires a reading question and a guide');
 }
 
-const relatedTopics = {
-  'overview.html': [11,13,201],
-  'study.html': [11,13,201],
-  'prophets.html': [115],
-  'epistles.html': [227],
-  'gospels.html': [203,208,212,217],
-  'jesus-life.html': [203,208,212,217],
-  'nt-history.html': [222],
-  'kings-chronicles.html': [65,71,74,78],
-  'study-paths.html': [13,325,331,335]
-};
-for (const [file, starts] of Object.entries(relatedTopics)) {
-  let html=await readFile(file,'utf8');
-  html=html.replace(/<section class="chapter" id="panorama-topic">[\s\S]*?<\/section>/g,'');
-  const section='<section class="chapter" id="panorama-topic"><h2>新旧约全景 · 连着读</h2><ul>'+starts.map(start=>{
-    const entry=source.entries.find(e=>e.start===start);
-    return '<li><a href="'+pageUrl(entry)+'">'+esc(entry.title)+' · PDF '+entry.start+'—'+entry.end+'页</a></li>';
-  }).join('')+'</ul><p><a href="panorama.html">全部资料与讲道附录 →</a></p></section>';
-  html=html.replace('</main>',section+'</main>');
-  await writeFile(file,html);
+const bookFiles = number => files.filter(file => file.startsWith(String(number).padStart(2, '0') + '-'));
+const oldSlug = entry => 'panorama-' + String(entry.start).padStart(3, '0');
+const supplemental = new Map([
+  [1, ['panorama.html', 'panorama-about']], [5, ['panorama.html', 'panorama-about']],
+  [9, ['panorama.html', 'panorama-about']], [199, ['panorama.html', 'panorama-about']],
+  [11, ['overview.html', 'whole']], [13, ['overview.html', 'whole']], [201, ['overview.html', 'whole']],
+  [115, ['prophets.html', 'group-core']], [227, ['epistles.html', 'group-core']],
+  [320, ['preaching.html', 'spiritual-conflict']], [325, ['preaching.html', 'redemptive-history']],
+  [331, ['preaching.html', 'preaching-reform']], [335, ['preaching.html', 'sermon-preparation']]
+]);
+const entryByStart = new Map(source.entries.map(entry => [entry.start, entry]));
+
+function renderBlock(block, entry, index) {
+  const id = 'panorama-text-' + entry.start + '-' + (index + 1);
+  const text = block.kind === 'index' ? block.text.replace(/\s*\.{3,}\s*\d+\s*$/, '') : block.text;
+  const tag = block.kind === 'heading' ? 'h4' : 'p';
+  return `<${tag} id="${id}" data-source-block="${entry.start}:${index}" class="source-${block.kind}">${esc(text)}</${tag}>`;
+}
+
+function chapterParts(entry) {
+  const blocks = flow[entry.start].map((block, index) => ({...block, index}));
+  const reflection = blocks.findIndex(block => block.kind === 'reflection');
+  const body = reflection < 0 ? blocks : blocks.slice(0, reflection);
+  return {body, exercises: reflection < 0 ? [] : blocks.slice(reflection)};
+}
+
+function renderBlocks(entry, blocks) {
+  return blocks.map(block => renderBlock(block, entry, block.index)).join('');
+}
+
+function collapsible(entry, blocks, label, id = '') {
+  return `<details class="panorama-disclosure"${id ? ' id="' + id + '"' : ''}>
+    <summary><span class="panorama-disclosure-label">${esc(label)}</span><span class="panorama-disclosure-icon" aria-hidden="true"></span></summary>
+    <div class="panorama-prose">${renderBlocks(entry, blocks)}</div>
+  </details>`;
+}
+
+function section(id, title, body) {
+  return `<section class="chapter panorama-section" id="${id}"><h2>${esc(title)}</h2>${body}</section>`;
+}
+
+function addInside(html, id, markup, atStart = false) {
+  const open = html.match(new RegExp('<section\\b[^>]*\\bid="' + id + '"[^>]*>'));
+  if (!open) throw new Error('Missing target section ' + id);
+  const start = open.index + open[0].length;
+  if (atStart) {
+    const headingEnd = html.indexOf('</h2>', start);
+    if (headingEnd < 0) throw new Error('Missing heading in ' + id);
+    const position = headingEnd + 5;
+    return html.slice(0, position) + markup + html.slice(position);
+  }
+  // Existing reader anchors identify flat sections. The few descendants that
+  // use sections in the overview are balanced here before inserting anything.
+  const tags = /<\/?section\b[^>]*>/g;
+  tags.lastIndex = start;
+  let depth = 1;
+  for (let match; (match = tags.exec(html));) {
+    depth += match[0].startsWith('</') ? -1 : 1;
+    if (!depth) return html.slice(0, match.index) + markup + html.slice(match.index);
+  }
+  throw new Error('Unclosed section ' + id);
+}
+
+for (const entry of source.entries.filter(entry => entry.book)) {
+  const {body, exercises} = chapterParts(entry);
+  const [question, prompt] = guides[entry.book - 1];
+  const lead = body.slice(0, body[0]?.kind === 'heading' ? 2 : 1);
+  const rest = body.slice(lead.length);
+  const start = `<aside class="panorama-bridge" aria-labelledby="panorama-question" id="panorama-reading">
+    <div class="panorama-kicker"><span aria-hidden="true">◇</span> 带着一个问题读</div>
+    <h3 id="panorama-question">${esc(question)}</h3>
+    <p>${esc(prompt)}</p>
+    <div class="panorama-steps"><a href="#structure">看结构</a><a href="#panorama-continuation" data-open-reading>读全景解读</a>${exercises.length ? '<a href="#panorama-recall" data-open-reading>做默想</a>' : ''}</div>
+  </aside>
+  <div class="panorama-excerpt"><div class="panorama-byline">刘道顺 ·《新旧约圣经全景》</div><div class="panorama-prose">${renderBlocks(entry, lead)}</div></div>`;
+  const continuation = `<div class="panorama-inline" id="panorama-continuation">
+    ${collapsible(entry, rest, '沿着本卷结构，接着读刘道顺牧师的全景解读')}
+    <a class="panorama-small-link" href="../${oldSlug(entry)}.html">连续阅读本篇 ↗</a>
+  </div>`;
+  const reflection = exercises.length ? `<div class="panorama-reflection" id="panorama-recall">
+    <h3>用自己的话复述</h3><p>合上正文，先试着回答，再翻回经文。</p>
+    ${collapsible(entry, exercises, '展开原书默想题')}
+  </div>` : '';
+  for (const file of bookFiles(entry.book)) {
+    let html = await readFile('books/' + file, 'utf8');
+    html = addInside(html, 'whole', start, true);
+    html = addInside(html, 'structure', continuation);
+    if (reflection) html = addInside(html, 'recall', reflection, true);
+    await writeFile('books/' + file, html);
+  }
+}
+
+function insertReading(entry, label = entry.title) {
+  const blocks = flow[entry.start].map((block, index) => ({...block, index}));
+  return collapsible(entry, blocks, label, 'panorama-reading-' + entry.start);
+}
+
+const contextualReadings = [
+  ['overview.html', 'whole', [11,13,201]],
+  ['study.html', 'whole', [11,13,201]],
+  ['prophets.html', 'group-core', [115]],
+  ['epistles.html', 'group-core', [227]]
+];
+for (const [file, id, entries] of contextualReadings) {
+  let html = await readFile(file, 'utf8');
+  html = addInside(html, id, `<aside class="panorama-inline"><div class="panorama-byline">刘道顺 ·《新旧约圣经全景》</div>${entries.map(start => insertReading(entryByStart.get(start))).join('')}</aside>`);
+  await writeFile(file, html);
+}
+
+const sermonTopics = [
+  [320, '属灵争战与传道', '从弗6:10–18读群体如何靠主站立，再比较作者怎样把属灵争战与教会见证相连。'],
+  [325, '给经文找到救赎史的位置', '先问当时发生了什么，再追踪应许怎样延续，最后说明这段经文怎样指向基督。'],
+  [331, '检视讲道把重心放在哪里', '用作者提出的问题检查一篇讲章的中心、经文依据，以及如何让会众听见福音。'],
+  [335, '预备一篇可以讲清楚的讲章', '从选段、理解上下文到写出中心句，再用听众的处境检验应用是否具体。']
+];
+const sermon = sermonTopics.map(([start, title, prompt]) => {
+  const [,id] = supplemental.get(start);
+  return section(id, title, `<p class="panorama-deck">${esc(prompt)}</p>${insertReading(entryByStart.get(start), '读这篇讲道文章')}`);
+}).join('');
+await studyPage('preaching', '从研经到讲道', '用四篇文章练习解释经文、连接救赎历史与预备应用。', sermon);
+
+const paths = [
+  ['◈','从应许读到归回','创造、立约、王国、被掳与归回','overview.html#whole'],
+  ['✦','从基督读到万民','耶稣的事工、受难、复活与教会见证','geography.html#galilee'],
+  ['❧','从研经读到讲道','找准经文脉络，形成清楚的解释与应用','preaching.html']
+];
+const pathLinks = paths.map(([icon, title, caption, href]) =>
+  `<a href="${href}"><span aria-hidden="true">${icon}</span><strong>${title}</strong><small>${caption}</small></a>`
+).join('');
+const readingIndex = groups.map(group => {
+  const list = books.flatMap((book,index) => {
+    if(book.group !== group.id) return [];
+    return [`<li><a href="books/${bookFiles(index+1)[0]}#panorama-reading">${esc(book.name)}</a></li>`];
+  }).join('');
+  return `<article class="panorama-shelf-group"><h3>${esc(group.name)}</h3><ul>${list}</ul></article>`;
+}).join('');
+const hub = `<div class="panorama-hub-lead"><div><p class="panorama-deck">从一卷开始，也可以沿着应许、成全和见证读下去。</p>
+  <div class="panorama-paths">${pathLinks}</div></div>
+  <figure><img src="assets/geo/galilee.webp" width="960" height="320" decoding="async" alt="加利利湖岸的村落与渔船"></figure></div>`
+  + section('panorama-shelf','选一卷开始读',`<div class="panorama-shelf">${readingIndex}</div>`)
+  + section('panorama-about','关于这本书',`<p>本专题根据刘道顺牧师《新旧约圣经全景》编入各卷。书中的叙述跟随阅读进程安排，作者解读在对应位置署名。</p>
+    ${[1,5,9,199].map(start => insertReading(entryByStart.get(start))).join('')}
+    <a class="panorama-small-link" href="assets/panorama/original.pdf">下载原资料</a>`);
+await studyPage('panorama', '新旧约全景', '从创造与应许，读到基督与新创造。', hub);
+
+for (const [index, entry] of source.entries.entries()) {
+  const blocks = flow[entry.start].map((block, blockIndex) => ({...block, index:blockIndex}));
+  const alignment = entry.book
+    ? ['books/' + bookFiles(entry.book)[0], 'panorama-reading']
+    : supplemental.get(entry.start);
+  // Preserve old chapter URLs and page bookmarks with continuous web text.
+  const anchors = new Map();
+  for (const {page} of entry.pages) {
+    const at = blocks.findIndex(block => block.page >= page);
+    const key = at < 0 ? blocks.length : at;
+    anchors.set(key, (anchors.get(key) ?? '') + `<span class="panorama-bookmark" id="pdf-${page}" aria-hidden="true"></span>`);
+  }
+  const rendered = blocks.map((block, i) => (anchors.get(i) ?? '') + renderBlock(block, entry, i)).join('')
+    + (anchors.get(blocks.length) ?? '');
+  const previous = index ? `<a href="${oldSlug(source.entries[index - 1])}.html">← ${esc(source.entries[index - 1].title)}</a>` : '';
+  const next = index < source.entries.length - 1
+    ? `<a href="${oldSlug(source.entries[index + 1])}.html">${esc(source.entries[index + 1].title)} →</a>` : '';
+  const paging = `<nav class="panorama-paging" aria-label="连续阅读">${previous}<a href="panorama.html">全书入口</a>${next}</nav>`;
+  await studyPage(oldSlug(entry), entry.title, '刘道顺 ·《新旧约圣经全景》',
+    section('panorama-continuous','连续阅读',`<p><a class="panorama-small-link" href="${alignment.join('#')}">进入相关精读 →</a></p>
+    <div class="panorama-prose">${rendered}</div>`) + paging);
 }

@@ -1,6 +1,6 @@
 # 整本圣经 · 救赎历史与逐卷深读
 
-**整本圣经-20261119-v2.2.0-GTstudy**
+**整本圣经-20261119-v2.3.0-GTstudy**
 
 默认首页直接显示全部66卷；全景位于第二入口。欧陆改革宗、救赎历史、圣约神学与圣经神学为整体框架。
 
@@ -9,11 +9,17 @@
 | 平台 | 公开地址 |
 | --- | --- |
 | GitHub Pages | https://07-je-gt-love-personal-20260918.github.io/bible-reformed-atlas-GTstudy/ |
-| Vercel | https://bible-reformed-atlas-20261119-v2-2-gtstudy.vercel.app/ |
-| Surge | https://bible-reformed-atlas-20261119-v2-2-gtstudy.surge.sh/ |
+| Vercel | https://bible-reformed-atlas-20261119-v2-3-gtstudy.vercel.app/ |
+| Surge | https://bible-reformed-atlas-20261119-v2-3-gtstudy.surge.sh/ |
 | GitHub 源码 | https://github.com/07-Je-GT-Love-Personal-20260918/bible-reformed-atlas-GTstudy |
 
 仓库已按要求改名为仅含主题与GTstudy的 `bible-reformed-atlas-GTstudy`，ID仍为1376927002，没有新建重复仓库。旧GitHub仓库链接由GitHub重定向；Pages应使用上表新路径，不能把仓库重定向等同于Pages路径重定向。旧Vercel域名和两个旧Surge域名继续保留。
+
+## v2.3 更新 · 2026-11-19
+
+- 刘道顺牧师的全景解读进入66卷精读正文。每卷先提一个具体的阅读问题，在全卷结构后可就地展开作者解读，原书默想题与本卷的复述练习相接。
+- 按自然段落连续排版，把跨页句子接起来。全景入口按正典书群和阅读路线组织，序论、先知书与书信导论各在对应专题阅读，四篇讲道文章集中在「从研经到讲道」。
+- 提供按篇连续阅读入口，旧地址和页码书签可打开。原资料仍可下载。更新前恢复点：`v2.2.0-20261119-before-v2.3`。
 
 ## v2.2 更新 · 2026-11-19
 

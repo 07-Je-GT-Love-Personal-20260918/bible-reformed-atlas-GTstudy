@@ -81,3 +81,10 @@
   document.addEventListener('keydown',e=>{if(e.key==='Escape')dock.open=false});
   document.addEventListener('click',e=>{if(!dock.contains(e.target))dock.open=false});
 })();
+/* The reading cue expands its matching section before the browser jumps. */
+document.addEventListener('click', event => {
+  const link = event.target.closest('a[data-open-reading]');
+  if (!link) return;
+  const disclosure = document.getElementById(link.hash.slice(1))?.querySelector('.panorama-disclosure');
+  if (disclosure) disclosure.open = true;
+});
