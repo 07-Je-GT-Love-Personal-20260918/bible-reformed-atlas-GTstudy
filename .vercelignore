@@ -8,3 +8,4 @@ index.js
 bundle.html
 preview.html
 *.pdf
+!assets/panorama/original.pdf
