@@ -3,7 +3,7 @@
   const toc = document.querySelector('#bookToc, #tocTree');
   if (toc) {
     const headings = [...document.querySelectorAll('main h2,main h3,main h4')]
-      .filter(h => !h.closest('.creed-paragraphs,.live-event,.harmony-index'));
+      .filter(h => !h.closest('.creed-paragraphs,.live-event,.harmony-index,.panorama-excerpt,.panorama-disclosure'));
     const tree = document.createElement('div');
     const sourceNav=toc.querySelector('[data-source-nav]')?.cloneNode(true);
     if(sourceNav)tree.append(sourceNav);
