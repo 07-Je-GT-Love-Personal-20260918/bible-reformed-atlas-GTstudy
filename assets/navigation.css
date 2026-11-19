@@ -1,0 +1,18 @@
+.travel-dock{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));right:14px;z-index:130;font:inherit;color:var(--ink)}
+.travel-dock>summary{list-style:none;display:grid;place-items:center;width:42px;height:42px;border:1px solid var(--line);border-radius:14px;cursor:pointer;background:var(--card);box-shadow:0 5px 22px #12342b18;font-size:24px}
+.travel-dock>summary::-webkit-details-marker{display:none}
+.travel-dock>div{position:absolute;bottom:52px;right:0;display:grid;grid-template-columns:repeat(3,42px);gap:5px;padding:8px;border:1px solid var(--line);border-radius:15px;background:var(--card);box-shadow:0 8px 28px #12342b20}
+.travel-dock:not([open])>div{display:none}
+.travel-dock button{width:42px;height:42px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:21px;color:var(--ink);background:var(--card);cursor:pointer}
+.travel-dock button:hover{background:color-mix(in srgb,var(--green) 12%,var(--card))}
+.travel-dock :focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.atlas-v2 .reader-settings{display:none}
+.toc-v2-tools>div{flex-wrap:wrap}
+.panorama-index,.panorama-lenses{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.panorama-index article,.panorama-lenses article{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card)}
+.panorama-index h3{font-size:1.1rem!important;margin:0}.panorama-index p{margin:6px 0;font-size:.85rem}
+.panorama-flow{display:flex;flex-wrap:wrap;gap:12px;list-style:none;padding:0}
+.panorama-flow li{padding:9px 12px;border-radius:10px;background:color-mix(in srgb,var(--blue) 10%,var(--card))}
+.source-page{content-visibility:auto;contain-intrinsic-size:auto 1000px}
+.panorama-paging{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:18px 0}
+@media(max-width:650px){.panorama-index,.panorama-lenses{grid-template-columns:1fr}.travel-dock{right:10px}.atlas-v2 .experience-panel{bottom:74px}}

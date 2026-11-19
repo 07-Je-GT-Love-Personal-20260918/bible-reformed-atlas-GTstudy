@@ -16,7 +16,7 @@ class Page(HTMLParser):
                 self.ids.add(value)
             if key in ('href','src','poster') and value:self.links.append(value)
 
-paths=[public/'index.html',public/'study.html',public/'overview.html',public/'nt-history.html',public/'gospel-harmony.html',public/'creeds.html',*[public/(x+'.html') for x in ['gospels','jesus-life','kings-chronicles','book-relations','pentateuch','historical-books','wisdom-books','prophets','epistles','study-paths','geography']],*sorted((public/'books').glob('*.html'))]
+paths=list(public.rglob('*.html'))
 cache={p.resolve():Page(p.read_text(encoding='utf-8')) for p in public.rglob('*.html')}
 errors=[]
 for path in paths:
@@ -85,3 +85,21 @@ for code in ['MAT','MRK','LUK','JHN']:
     expected.extend(code+':'+key for key in source['verses'])
 assert len(seen)==len(set(seen))==3768 and set(seen)==set(expected)
 assert (public/'nt-history.html').read_text(encoding='utf-8').count('class="nt-event"')==46
+
+
+source=json.loads((root/'data/panorama-source.json').read_text(encoding='utf-8'))
+covered=[]
+for entry in source['entries']:
+    reader=public/f"panorama-{entry['start']:03d}.html"
+    text=reader.read_text(encoding='utf-8')
+    for page in entry['pages']:
+        assert f'id="pdf-{page["page"]}"' in text, page['page']
+        covered.append(page['page'])
+assert sorted(covered)==list(range(1,340)) and len(set(covered))==339
+assert len([e for e in source['entries'] if e['book']])==66
+import hashlib
+assert hashlib.sha256((public/'assets/panorama/original.pdf').read_bytes()).hexdigest()==source['sha256']
+for number in range(1,67):
+    path=sorted((public/'books').glob(f'{number:02d}-*.html'))[0]
+    assert 'id="panorama-reading"' in path.read_text(encoding='utf-8')
+print('Panorama: all 339 pages, 79 units, 66 book links; original PDF SHA-256 verified.')

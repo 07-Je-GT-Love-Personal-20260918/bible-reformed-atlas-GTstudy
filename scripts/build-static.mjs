@@ -7,6 +7,7 @@ await import('./compose-reader.mjs');
 await import('./build-nt-atlas.mjs');
 await import('./build-v2-home.mjs');
 await import('./build-geography.mjs');
+await import('./build-panorama.mjs');
 await import('./enhance-v2.mjs');
 const destination=resolve('dist');
 if(dirname(destination)!==resolve('.')||basename(destination)!=='dist')throw Error('Unexpected static output path');

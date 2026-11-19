@@ -31,12 +31,14 @@ if (mapEntries[f]) {
   else html = html.replace(/(<header class="reader-hero"[\s\S]*?<\/header>)/, '$1'+link);
 }
 if(f==='index.html') html=html.replace('</h1>', '</h1><p class="geo-related"><a href="geography.html">⌖ 地理、历史与文化 · 图解、实时底图与复习视频 →</a></p>');
-html = html.replace(/<meta name="atlas-version" content="[^"]+">/, '<meta name="atlas-version" content="2.1.0">')
-  .replaceAll('v2.0.0 · 2026-10-23','v2.1.0 · 2026-11-16')
-  .replaceAll('2026-10-23 · v2.0','2026-11-16 · v2.1')
-  .replace(/GTstudy v2\.0(?!\d)/g, 'GTstudy v2.1');
+html = html.replace(/<meta name="atlas-version" content="[^"]+">/, '<meta name="atlas-version" content="2.2.0">')
+  .replaceAll('v2.0.0 · 2026-10-23','v2.2.0 · 2026-11-19')
+  .replaceAll('2026-10-23 · v2.0','2026-11-19 · v2.1')
+  .replace(/GTstudy v2\.0(?!\d)/g, 'GTstudy v2.2');
 if(f==='geography.html') html=html.replace('</head>','<link rel="stylesheet" href="assets/geo/atlas.css"></head>').replace('</body>','<script type="module" src="assets/geo/maps.js"></script></body>');
 else if(mapEntries[f]||f==='index.html') html=html.replace('</head>','<link rel="stylesheet" href="assets/geo/atlas.css"></head>');
+html=html.replace('</head>',`<link rel="stylesheet" href="${prefix}assets/navigation.css"></head>`).replace('</body>',`<script src="${prefix}assets/navigation.js" defer></script></body>`);
+if(f==='index.html') html=html.replace('</h1>','</h1><p class="geo-related"><a href="panorama.html">▤ 新旧约全景 · 全书资料、逐卷默想与讲道附录 →</a></p>');
 await writeFile(f,html);
 }
 console.log('v2 shell applied: unified ordered navigation, 66 enriched readers and132 evidence links.');
